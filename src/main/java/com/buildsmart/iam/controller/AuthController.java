@@ -1,6 +1,10 @@
 package com.buildsmart.iam.controller;
 
-import com.buildsmart.iam.dto.*;
+import com.buildsmart.iam.dto.AuthResponse;
+import com.buildsmart.iam.dto.LoginRequest;
+import com.buildsmart.iam.dto.LogoutRequest;
+import com.buildsmart.iam.dto.LogoutResponse;
+import com.buildsmart.iam.dto.SignupRequest;
 import com.buildsmart.iam.entity.User;
 import com.buildsmart.iam.service.LogoutService;
 import com.buildsmart.iam.service.UserService;
@@ -48,7 +52,7 @@ public class AuthController {
                     .body(new CustomApiResponse(false, e.getMessage(), null));
         }
     }
-
+    
     @PostMapping("/login")
     @Operation(summary = "Authenticate user", description = "Authenticates user credentials and returns JWT token")
     @ApiResponses(value = {
@@ -56,7 +60,6 @@ public class AuthController {
         @ApiResponse(responseCode = "401", description = "Invalid credentials"),
         @ApiResponse(responseCode = "403", description = "Account not active")
     })
-
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest,
                                              HttpServletRequest request) {
         try {
