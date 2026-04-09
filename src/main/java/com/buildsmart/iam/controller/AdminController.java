@@ -27,7 +27,6 @@ import java.util.Optional;
 @RequestMapping("/admin")
 @Tag(name = "Admin Management", description = "Admin management APIs")
 @SecurityRequirement(name = "bearerAuth")
-@CrossOrigin(origins = "*", maxAge = 3600)
 public class AdminController {
     
     @Autowired

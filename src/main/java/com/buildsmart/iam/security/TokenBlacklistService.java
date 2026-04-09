@@ -35,7 +35,7 @@ public class TokenBlacklistService {
         }
 
         if (expiry.isBefore(now)) {
-            // Token has naturally expired; remove from blacklist
+            
             blacklistedTokens.remove(token);
             return false;
         }

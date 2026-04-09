@@ -20,7 +20,6 @@ import java.util.Optional;
 @RequestMapping("/users")
 @Tag(name = "User Management", description = "User management APIs")
 @SecurityRequirement(name = "bearerAuth")
-@CrossOrigin(origins = "*", maxAge = 3600)
 public class UserController {
     
     @Autowired

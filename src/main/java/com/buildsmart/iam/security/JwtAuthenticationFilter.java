@@ -95,16 +95,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
         // Allow authentication and documentation endpoints without JWT
-        return path.startsWith("/api/v1/auth/") ||
-               path.startsWith("/api/auth/") ||
-               path.startsWith("/auth/") ||
-               path.startsWith("/api/v1/swagger-ui") || 
-               path.startsWith("/api/v1/v3/api-docs") ||
+        return path.startsWith("/api/auth/") ||
                path.startsWith("/swagger-ui") || 
                path.startsWith("/v3/api-docs") ||
                path.equals("/swagger-ui.html") ||
                path.startsWith("/api-docs") ||
-               path.startsWith("/api/v1/actuator") ||
                path.startsWith("/actuator");
     }
 }

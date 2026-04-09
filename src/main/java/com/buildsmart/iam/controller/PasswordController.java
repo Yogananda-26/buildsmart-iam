@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/auth")
 @Tag(name = "Password Management", description = "Password management APIs")
-@CrossOrigin(origins = "*", maxAge = 3600)
 public class PasswordController {
     
     @Autowired
