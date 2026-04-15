@@ -1,0 +1,19 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Run Backend",
+			"type": "shell",
+			"command": "cd \"C:\\Users\\2479642\\Desktop\\Report & Analytics\" ; mvn spring-boot:run",
+			"isBackground": true,
+			"problemMatcher": []
+		},
+		{
+			"label": "Run Backend",
+			"type": "shell",
+			"command": "Push-Location 'C:\\Users\\2479642\\Desktop\\Report & Analytics'; mvn spring-boot:run",
+			"isBackground": true,
+			"problemMatcher": []
+		}
+	]
+}
