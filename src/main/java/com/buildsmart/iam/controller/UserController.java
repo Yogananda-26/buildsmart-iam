@@ -115,7 +115,62 @@ public class UserController {
         }
     }
     
+    @GetMapping("/{userId}")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Get user by ID", description = "Fetches user details by userId (used for service-to-service lookup)")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "User found"),
+        @ApiResponse(responseCode = "404", description = "User not found")
+    })
+    public ResponseEntity<?> getUserById(@PathVariable String userId) {
+        Optional<User> user = userService.findById(userId);
+        if (user.isPresent()) {
+            return ResponseEntity.ok(new UserLookupDto(
+                    user.get().getUserId(),
+                    user.get().getName(),
+                    user.get().getEmail(),
+                    user.get().getRole().name(),
+                    user.get().getStatus().name()
+            ));
+        }
+        return ResponseEntity.notFound().build();
+    }
+    
+    @GetMapping("/by-email")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Get user by email", description = "Fetches user details by email (used for service-to-service lookup)")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "User found"),
+        @ApiResponse(responseCode = "404", description = "User not found")
+    })
+    public ResponseEntity<?> getUserByEmail(@RequestParam String email) {
+        Optional<User> user = userService.findByEmail(email);
+        if (user.isPresent()) {
+            return ResponseEntity.ok(new UserLookupDto(
+                    user.get().getUserId(),
+                    user.get().getName(),
+                    user.get().getEmail(),
+                    user.get().getRole().name(),
+                    user.get().getStatus().name()
+            ));
+        }
+        return ResponseEntity.notFound().build();
+    }
+    
     // Helper classes
+    
+    /**
+     * Lightweight DTO for service-to-service user lookup.
+     * Does not expose password or audit fields.
+     */
+    public record UserLookupDto(
+            String userId,
+            String name,
+            String email,
+            String role,
+            String status
+    ) {}
+    
     public static class CustomApiResponse {
         private boolean success;
         private String message;

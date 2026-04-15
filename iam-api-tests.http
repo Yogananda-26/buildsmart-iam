@@ -1,0 +1,396 @@
+### ============================================================
+### BuildSmart IAM Service - API Testing
+### Base URL: http://localhost:8082
+### ============================================================
+### NOTE: IAM requires MySQL running on localhost:3306
+###       Database: buildsmart_iam
+###       Ensure Eureka Server is running on port 8761
+
+### =====================
+### HEALTH CHECK
+### =====================
+
+### 1. Health Check
+GET http://localhost:8082/actuator/health
+Accept: application/json
+
+### 2. Swagger UI (open in browser)
+# http://localhost:8082/swagger-ui.html
+
+
+### =====================
+### AUTH - SIGNUP
+### =====================
+
+### 3. Signup - Project Manager
+POST http://localhost:8082/api/auth/signup
+Content-Type: application/json
+
+{
+  "name": "Rajesh Kumar",
+  "email": "rajesh.kumar@buildsmart.com",
+  "phone": "9876543210",
+  "password": "Password123",
+  "role": "PROJECT_MANAGER"
+}
+
+### 4. Signup - Site Engineer
+POST http://localhost:8082/api/auth/signup
+Content-Type: application/json
+
+{
+  "name": "Anitha Sharma",
+  "email": "anitha.sharma@buildsmart.com",
+  "phone": "9876543211",
+  "password": "Password123",
+  "role": "SITE_ENGINEER"
+}
+
+### 5. Signup - Safety Officer
+POST http://localhost:8082/api/auth/signup
+Content-Type: application/json
+
+{
+  "name": "Meera Joshi",
+  "email": "meera.joshi@buildsmart.com",
+  "phone": "9876543213",
+  "password": "Password123",
+  "role": "SAFETY_OFFICER"
+}
+
+### 6. Signup - Vendor
+POST http://localhost:8082/api/auth/signup
+Content-Type: application/json
+
+{
+  "name": "Suresh Constructions",
+  "email": "suresh@vendor.com",
+  "phone": "9876543215",
+  "password": "Password123",
+  "role": "VENDOR"
+}
+
+### 7. Signup - Finance Officer
+POST http://localhost:8082/api/auth/signup
+Content-Type: application/json
+
+{
+  "name": "Priya Menon",
+  "email": "priya.menon@buildsmart.com",
+  "phone": "9876543217",
+  "password": "Password123",
+  "role": "FINANCE_OFFICER"
+}
+
+### 8. Signup - Admin
+POST http://localhost:8082/api/auth/signup
+Content-Type: application/json
+
+{
+  "name": "System Admin",
+  "email": "admin@buildsmart.com",
+  "phone": "9876543219",
+  "password": "Admin123",
+  "role": "ADMIN"
+}
+
+### 9. Signup - Duplicate Email (should fail 400)
+POST http://localhost:8082/api/auth/signup
+Content-Type: application/json
+
+{
+  "name": "Duplicate User",
+  "email": "rajesh.kumar@buildsmart.com",
+  "phone": "9999999999",
+  "password": "Password123",
+  "role": "VENDOR"
+}
+
+### 10. Signup - Invalid Email (should fail 400)
+POST http://localhost:8082/api/auth/signup
+Content-Type: application/json
+
+{
+  "name": "Bad Email User",
+  "email": "not-an-email",
+  "phone": "9876543200",
+  "password": "Password123",
+  "role": "VENDOR"
+}
+
+### 11. Signup - Weak Password (should fail 400)
+POST http://localhost:8082/api/auth/signup
+Content-Type: application/json
+
+{
+  "name": "Weak Password User",
+  "email": "weak@buildsmart.com",
+  "phone": "9876543201",
+  "password": "123",
+  "role": "VENDOR"
+}
+
+
+### =====================
+### AUTH - LOGIN
+### =====================
+
+### 12. Login - Admin (NOTE: New users start as PENDING_VERIFICATION.
+###    You need to first approve the admin user via DB or use a pre-seeded admin)
+POST http://localhost:8082/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@buildsmart.com",
+  "password": "Admin123"
+}
+
+> {%
+    client.global.set("admin_token", response.body.token);
+    client.log("Admin Token: " + response.body.token);
+%}
+
+### 13. Login - Project Manager (after admin approves)
+POST http://localhost:8082/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "rajesh.kumar@buildsmart.com",
+  "password": "Password123"
+}
+
+> {%
+    client.global.set("pm_token", response.body.token);
+    client.log("PM Token: " + response.body.token);
+%}
+
+### 14. Login - Site Engineer (after admin approves)
+POST http://localhost:8082/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "anitha.sharma@buildsmart.com",
+  "password": "Password123"
+}
+
+> {%
+    client.global.set("se_token", response.body.token);
+%}
+
+### 15. Login - Invalid Credentials (should fail 401)
+POST http://localhost:8082/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "rajesh.kumar@buildsmart.com",
+  "password": "WrongPassword"
+}
+
+### 16. Login - Non-existent User (should fail 401)
+POST http://localhost:8082/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "nobody@buildsmart.com",
+  "password": "Password123"
+}
+
+
+### =====================
+### USER PROFILE (JWT Required)
+### Replace {{admin_token}}, {{pm_token}}, {{se_token}} with actual JWT tokens from login
+### =====================
+
+### 17. Get Current User Profile (Admin)
+GET http://localhost:8082/users/profile
+Authorization: Bearer {{admin_token}}
+Accept: application/json
+
+### 18. Get Current User Profile (PM)
+GET http://localhost:8082/users/profile
+Authorization: Bearer {{pm_token}}
+Accept: application/json
+
+### 19. Get Current User Profile (SE)
+GET http://localhost:8082/users/profile
+Authorization: Bearer {{se_token}}
+Accept: application/json
+
+### 20. Update User Profile
+PUT http://localhost:8082/users/profile
+Authorization: Bearer {{pm_token}}
+Content-Type: application/json
+
+{
+  "name": "Rajesh Kumar Updated",
+  "phone": "9876540000"
+}
+
+### 21. Check Role - PM checking PROJECT_MANAGER role
+GET http://localhost:8082/users/check-role/PROJECT_MANAGER
+Authorization: Bearer {{pm_token}}
+Accept: application/json
+
+### 22. Check Role - PM checking ADMIN role (should return hasRole: false)
+GET http://localhost:8082/users/check-role/ADMIN
+Authorization: Bearer {{pm_token}}
+Accept: application/json
+
+### 23. Check Role - Invalid Role (should fail 400)
+GET http://localhost:8082/users/check-role/INVALID_ROLE
+Authorization: Bearer {{pm_token}}
+Accept: application/json
+
+### 24. Profile without token (should fail 401)
+GET http://localhost:8082/users/profile
+Accept: application/json
+
+
+### =====================
+### ADMIN ENDPOINTS (Admin JWT Required)
+### =====================
+
+### 25. Get Pending Users (Admin only)
+GET http://localhost:8082/admin/pending-users
+Authorization: Bearer {{admin_token}}
+Accept: application/json
+
+### 26. Approve User (replace USER_ID with actual pending user ID)
+POST http://localhost:8082/admin/approve-user/PM001
+Authorization: Bearer {{admin_token}}
+Accept: application/json
+
+### 27. Approve Site Engineer
+POST http://localhost:8082/admin/approve-user/SE001
+Authorization: Bearer {{admin_token}}
+Accept: application/json
+
+### 28. Approve Safety Officer
+POST http://localhost:8082/admin/approve-user/SO001
+Authorization: Bearer {{admin_token}}
+Accept: application/json
+
+### 29. Approve Vendor
+POST http://localhost:8082/admin/approve-user/VN001
+Authorization: Bearer {{admin_token}}
+Accept: application/json
+
+### 30. Approve Finance Officer
+POST http://localhost:8082/admin/approve-user/FN001
+Authorization: Bearer {{admin_token}}
+Accept: application/json
+
+### 31. Reject User (replace USER_ID)
+POST http://localhost:8082/admin/reject-user/SOME_USER_ID
+Authorization: Bearer {{admin_token}}
+Accept: application/json
+
+### 32. Get All Users (Admin only)
+GET http://localhost:8082/admin/users
+Authorization: Bearer {{admin_token}}
+Accept: application/json
+
+### 33. Get All Users with Pagination
+GET http://localhost:8082/admin/users?page=0&size=5&sortBy=createdAt&sortDir=desc
+Authorization: Bearer {{admin_token}}
+Accept: application/json
+
+### 34. Get User by ID (Admin)
+GET http://localhost:8082/admin/users/PM001
+Authorization: Bearer {{admin_token}}
+Accept: application/json
+
+### 35. Update User (Admin)
+PUT http://localhost:8082/admin/users/SE001
+Authorization: Bearer {{admin_token}}
+Content-Type: application/json
+
+{
+  "name": "Anitha Sharma Updated",
+  "phone": "9876543211",
+  "role": "SITE_ENGINEER",
+  "status": "ACTIVE"
+}
+
+### 36. Get Users by Role (Admin)
+GET http://localhost:8082/admin/users/role/PROJECT_MANAGER
+Authorization: Bearer {{admin_token}}
+Accept: application/json
+
+### 37. Get Users by Role - VENDOR (Admin)
+GET http://localhost:8082/admin/users/role/VENDOR
+Authorization: Bearer {{admin_token}}
+Accept: application/json
+
+### 38. Get Audit Logs (Admin)
+GET http://localhost:8082/admin/audit-logs?page=0&size=20
+Authorization: Bearer {{admin_token}}
+Accept: application/json
+
+### 39. Get Audit Logs for User (Admin)
+GET http://localhost:8082/admin/audit-logs/user/PM001
+Authorization: Bearer {{admin_token}}
+Accept: application/json
+
+### 40. Admin endpoint with non-admin token (should fail 403)
+GET http://localhost:8082/admin/users
+Authorization: Bearer {{pm_token}}
+Accept: application/json
+
+
+### =====================
+### PASSWORD RESET
+### =====================
+
+### 41. Forgot Password
+POST http://localhost:8082/api/auth/forgot-password
+Content-Type: application/json
+
+{
+  "email": "rajesh.kumar@buildsmart.com"
+}
+
+### 42. Reset Password (replace TOKEN with actual reset token from email)
+POST http://localhost:8082/api/auth/reset-password
+Content-Type: application/json
+
+{
+  "token": "REPLACE_WITH_RESET_TOKEN",
+  "newPassword": "NewPassword123"
+}
+
+### 43. Validate Reset Token
+GET http://localhost:8082/api/auth/validate-reset-token/REPLACE_WITH_RESET_TOKEN
+Accept: application/json
+
+
+### =====================
+### LOGOUT
+### =====================
+
+### 44. Logout (invalidate token)
+POST http://localhost:8082/api/auth/logout
+Authorization: Bearer {{se_token}}
+Content-Type: application/json
+
+{}
+
+### 45. Try using logged-out token (should fail 401)
+GET http://localhost:8082/users/profile
+Authorization: Bearer {{se_token}}
+Accept: application/json
+
+
+### =====================
+### DELETE USER (Admin)
+### =====================
+
+### 46. Delete User (Admin only)
+DELETE http://localhost:8082/admin/users/VN002
+Authorization: Bearer {{admin_token}}
+Accept: application/json
+
+### 47. Verify Deletion
+GET http://localhost:8082/admin/users/VN002
+Authorization: Bearer {{admin_token}}
+Accept: application/json

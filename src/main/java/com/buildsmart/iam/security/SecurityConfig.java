@@ -41,6 +41,9 @@ public class SecurityConfig {
                 .requestMatchers("/api-docs/**").permitAll()
                 .requestMatchers("/actuator/health").permitAll()
                 
+                // Internal service-to-service endpoints (require valid JWT, no role check)
+                .requestMatchers("/internal/**").authenticated()
+                
                 // Admin only endpoints
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 

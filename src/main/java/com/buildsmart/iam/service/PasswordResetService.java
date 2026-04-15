@@ -91,6 +91,11 @@ public class PasswordResetService {
         
         User user = resetToken.getUser();
         
+        // Ensure new password is not the same as the current password
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+            throw new RuntimeException("New password must be different from the current password");
+        }
+        
         // Update password
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
