@@ -42,11 +42,35 @@ public class GatewayConfig {
                         .filters(f -> f.filter(jwtAuthenticationFilter.apply(new JwtAuthenticationFilter.Config())))
                         .uri("lb://iam-service"))
 
-                // Future: Add other service routes here
-                // .route("project-service", r -> r
-                //         .path("/projects/**")
-                //         .filters(f -> f.filter(jwtAuthenticationFilter.apply(new JwtAuthenticationFilter.Config())))
-                //         .uri("lb://project-service"))
+                // Project Manager Service - All project endpoints (JWT required)
+                .route("project-manager-projects", r -> r
+                        .path("/api/projects/**")
+                        .filters(f -> f.filter(jwtAuthenticationFilter.apply(new JwtAuthenticationFilter.Config())))
+                        .uri("lb://project-manager-service"))
+
+                // Project Manager Service - User endpoints (JWT required)
+                .route("project-manager-users", r -> r
+                        .path("/api/users/**")
+                        .filters(f -> f.filter(jwtAuthenticationFilter.apply(new JwtAuthenticationFilter.Config())))
+                        .uri("lb://project-manager-service"))
+
+                // Project Manager Service - Approval endpoints (JWT required)
+                .route("project-manager-approvals", r -> r
+                        .path("/api/approvals/**")
+                        .filters(f -> f.filter(jwtAuthenticationFilter.apply(new JwtAuthenticationFilter.Config())))
+                        .uri("lb://project-manager-service"))
+
+                // Project Manager Service - Notification endpoints (JWT required)
+                .route("project-manager-notifications", r -> r
+                        .path("/api/notifications/**")
+                        .filters(f -> f.filter(jwtAuthenticationFilter.apply(new JwtAuthenticationFilter.Config())))
+                        .uri("lb://project-manager-service"))
+
+                // Safety Service - Incident & Inspection endpoints (JWT required)
+                .route("safety-service", r -> r
+                        .path("/api/safety/**")
+                        .filters(f -> f.filter(jwtAuthenticationFilter.apply(new JwtAuthenticationFilter.Config())))
+                        .uri("lb://safety-service"))
 
                 .build();
     }

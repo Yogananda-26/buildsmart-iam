@@ -1,5 +1,6 @@
 com\buildsmart\gateway\config\GatewayConfig.class
 com\buildsmart\gateway\util\JwtUtil.class
+com\buildsmart\gateway\config\CorsConfig$1.class
 com\buildsmart\gateway\ApiGatewayApplication.class
 com\buildsmart\gateway\config\CorsConfig.class
 com\buildsmart\gateway\filter\JwtAuthenticationFilter.class
