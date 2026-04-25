@@ -18,7 +18,8 @@ public class SignupRequest {
     
     @NotBlank(message = "Email is required")
     @Email(message = "Email should be valid")
-    @Schema(example = "john.doe@example.com", description = "User's email address")
+    @Pattern(regexp = "^[A-Za-z0-9+_.-]+@gmail\\.com$", message = "Email must be a valid Gmail address (e.g., user@gmail.com)")
+    @Schema(example = "john.doe@gmail.com", description = "User's Gmail address")
     private String email;
     
     @NotBlank(message = "Phone is required")

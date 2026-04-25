@@ -33,7 +33,7 @@ public class DataInitializer implements CommandLineRunner {
 
     private void initializeDefaultAdmin() {
         // Check if admin user already exists
-        if (userRepository.existsByEmail("admin@buildsmart.com")) {
+        if (userRepository.existsByEmail("admin@gmail.com")) {
             logger.info("Default admin user already exists");
             return;
         }
@@ -46,7 +46,7 @@ public class DataInitializer implements CommandLineRunner {
         admin.setUserId(adminId);
         
         admin.setName("System Administrator");
-        admin.setEmail("admin@buildsmart.com");
+        admin.setEmail("admin@gmail.com");
         admin.setPhone("0000000000");
         admin.setPassword(passwordEncoder.encode("admin123"));
         admin.setRole(Role.ADMIN);
@@ -55,7 +55,7 @@ public class DataInitializer implements CommandLineRunner {
         userRepository.save(admin);
         logger.info("Default admin user created successfully");
         logger.info("User ID: " + adminId);
-        logger.info("Email: admin@buildsmart.com");
+        logger.info("Email: admin@gmail.com");
         logger.info("Password: admin123");
     }
 }

@@ -28,6 +28,8 @@ import java.util.Optional;
 @Tag(name = "Admin Management", description = "Admin management APIs")
 @SecurityRequirement(name = "bearerAuth")
 public class AdminController {
+            @Autowired
+            private com.buildsmart.iam.service.EmailService emailService;
     
     @Autowired
     private UserService userService;
@@ -69,29 +71,25 @@ public class AdminController {
             Optional<User> userOpt = userService.findById(userId);
             if (userOpt.isEmpty()) {
                 CustomApiResponse response = new CustomApiResponse(false, "User not found", null);
-                
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
             }
-            
             User user = userOpt.get();
             if (user.getStatus() != com.buildsmart.iam.entity.UserStatus.PENDING_VERIFICATION) {
                 CustomApiResponse response = new CustomApiResponse(false, "User is not pending verification", null);
-                
                 return ResponseEntity.badRequest().body(response);
             }
-            
             user.setStatus(com.buildsmart.iam.entity.UserStatus.ACTIVE);
             User updatedUser = userService.updateUser(userId, user);
-            
             auditService.logAction(userId, "USER_APPROVED", "User Management", 
                     "User approved by admin: " + updatedUser.getEmail(), request);
-            
+            // Send approval email
+            try {
+                emailService.sendApprovalEmail(updatedUser.getEmail(), updatedUser.getName());
+            } catch (Exception ignored) {}
             CustomApiResponse response = new CustomApiResponse(true, "User approved successfully", updatedUser);
-            
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             CustomApiResponse response = new CustomApiResponse(false, "Error approving user: " + e.getMessage(), null);
-            
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
@@ -137,8 +135,8 @@ public class AdminController {
     }
     
     @GetMapping("/users")
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Get all users", description = "Retrieves all users in the system (Admin only)")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PROJECT_MANAGER')")
+    @Operation(summary = "Get all users", description = "Retrieves all users in the system (Admin or Project Manager)")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Users retrieved successfully"),
         @ApiResponse(responseCode = "403", description = "Access denied")
@@ -203,19 +201,20 @@ public class AdminController {
             if (userOpt.isEmpty()) {
                 return ResponseEntity.notFound().build();
             }
-            
             User user = userOpt.get();
             user.setName(updateRequest.getName());
             user.setPhone(updateRequest.getPhone());
             user.setRole(updateRequest.getRole());
             user.setStatus(updateRequest.getStatus());
-            
             User updatedUser = userService.updateUser(userId, user);
-            
             return ResponseEntity.ok(new CustomApiResponse(true, "User updated successfully", updatedUser));
         } catch (Exception e) {
+            // Improved error reporting: show root cause if JPA transaction fails
+            Throwable root = e;
+            while (root.getCause() != null) root = root.getCause();
+            String errorMsg = "Error updating user: " + root.getMessage();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new CustomApiResponse(false, "Error updating user: " + e.getMessage(), null));
+                    .body(new CustomApiResponse(false, errorMsg, null));
         }
     }
     
@@ -317,13 +316,17 @@ public class AdminController {
     
     public static class UserUpdateRequest {
         private String name;
+        @jakarta.validation.constraints.Pattern(regexp = "^[A-Za-z0-9+_.-]+@gmail\\.com$", message = "Email must be a valid Gmail address (e.g., user@gmail.com)")
+        private String email;
         private String phone;
         private com.buildsmart.iam.entity.Role role;
         private com.buildsmart.iam.entity.UserStatus status;
-        
+
         // Getters and Setters
         public String getName() { return name; }
         public void setName(String name) { this.name = name; }
+        public String getEmail() { return email; }
+        public void setEmail(String email) { this.email = email; }
         public String getPhone() { return phone; }
         public void setPhone(String phone) { this.phone = phone; }
         public com.buildsmart.iam.entity.Role getRole() { return role; }

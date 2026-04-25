@@ -157,6 +157,23 @@ public class UserController {
         return ResponseEntity.notFound().build();
     }
     
+    @GetMapping("/all")
+    @PreAuthorize("hasRole('PROJECT_MANAGER')")
+    @Operation(summary = "Get all users (Project Manager only)", description = "Retrieves all users in the system (Project Manager only)")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Users retrieved successfully"),
+        @ApiResponse(responseCode = "403", description = "Access denied")
+    })
+    public ResponseEntity<?> getAllUsersForProjectManager() {
+        try {
+            java.util.List<User> users = userService.findAllUsers();
+            return ResponseEntity.ok(new CustomApiResponse(true, "Users retrieved successfully", users));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(new CustomApiResponse(false, "Error retrieving users: " + e.getMessage(), null));
+        }
+    }
+    
     // Helper classes
     
     /**
@@ -193,11 +210,15 @@ public class UserController {
     
     public static class UserProfileUpdateRequest {
         private String name;
+        @jakarta.validation.constraints.Pattern(regexp = "^[A-Za-z0-9+_.-]+@gmail\\.com$", message = "Email must be a valid Gmail address (e.g., user@gmail.com)")
+        private String email;
         private String phone;
-        
+
         // Getters and Setters
         public String getName() { return name; }
         public void setName(String name) { this.name = name; }
+        public String getEmail() { return email; }
+        public void setEmail(String email) { this.email = email; }
         public String getPhone() { return phone; }
         public void setPhone(String phone) { this.phone = phone; }
     }

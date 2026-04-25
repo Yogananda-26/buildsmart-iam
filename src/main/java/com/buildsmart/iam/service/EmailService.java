@@ -12,6 +12,11 @@ import jakarta.mail.internet.MimeMessage;
 
 @Service
 public class EmailService {
+            public void sendApprovalEmail(String toEmail, String userName) {
+                String subject = "Your BuildSmart Account Has Been Approved";
+                String content = String.format("Dear %s,\n\nYour account has been approved. You can now log in to BuildSmart.\n\nThank you!\nBuildSmart Team", userName);
+                sendSimpleEmail(toEmail, subject, content);
+            }
     
     @Autowired
     private JavaMailSender mailSender;

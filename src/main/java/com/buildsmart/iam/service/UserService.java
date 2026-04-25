@@ -47,6 +47,11 @@ public class UserService {
             throw new RuntimeException("Phone number is already registered");
         }
         
+        // Check if username already exists
+        if (userRepository.existsByName(signupRequest.getName())) {
+            throw new RuntimeException("Username is already taken. Please choose another.");
+        }
+        
         // Create new user
         User user = new User();
         user.setName(signupRequest.getName());

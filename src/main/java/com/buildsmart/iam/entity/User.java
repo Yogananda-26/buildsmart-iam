@@ -11,7 +11,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", uniqueConstraints = {@UniqueConstraint(columnNames = {"name"})})
 @EntityListeners(AuditingEntityListener.class)
 public class User {
     
@@ -26,6 +26,7 @@ public class User {
     
     @NotBlank(message = "Email is required")
     @Email(message = "Email should be valid")
+    @jakarta.validation.constraints.Pattern(regexp = "^[A-Za-z0-9+_.-]+@gmail\\.com$", message = "Email must be a valid Gmail address (e.g., user@gmail.com)")
     @Column(name = "email", nullable = false, unique = true, length = 100)
     private String email;
     
